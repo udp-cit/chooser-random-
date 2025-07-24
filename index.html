@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>¿Quién es el impostor?</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <div id="app" class="flex flex-col items-center justify-center text-center p-4 select-none">
+
+        <!-- Pantalla de configuración -->
+        <div id="setup" class="space-y-4">
+            <h1 class="text-3xl font-bold">Juego del Impostor - Fútbol</h1>
+            <label class="block text-lg">¿Cuántos jugadores?</label>
+            <input id="numPlayers" type="number" min="2" max="10"
+                class="w-full max-w-xs px-4 py-2 rounded bg-gray-800 border border-gray-600 text-center"
+                placeholder="Ej: 4">
+            <button onclick="startGame()" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded">Empezar</button>
+        </div>
+
+        <!-- Pantalla de juego -->
+        <div id="game" class="hidden flex flex-col items-center justify-center w-full h-full space-y-6">
+            <p id="instruction" class="text-xl font-semibold">Jugador <span id="currentPlayer">1</span>: Mantén
+                presionada la pantalla</p>
+            <div id="counter" class="text-5xl font-bold font-mono"></div>
+            <div id="role" class="text-3xl font-bold mt-2"></div>
+        </div>
+
+        <!-- Pantalla final -->
+        <div id="end" class="hidden space-y-4">
+            <h2 class="text-2xl font-semibold">¡Todos han visto su rol!</h2>
+            <p class="text-lg">Ahora discutan quién es el impostor 😈</p>
+            <button onclick="location.reload()"
+                class="mt-4 bg-red-500 hover:bg-red-600 px-6 py-2 rounded">Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        const footballers = [
+            "Lionel Messi",
+            "Cristiano Ronaldo",
+            "Kylian Mbappé",
+            "Neymar",
+            "Erling Haaland",
+            "Luka Modric",
+            "Vinícius Jr.",
+            "Karim Benzema",
+            "Robert Lewandowski",
+            "Mohamed Salah",
+            "Harry Kane",
+            "Kevin De Bruyne",
+            "Antoine Griezmann",
+            "Sadio Mané",
+            "Son Heung-min",
+            "Paulo Dybala",
+            "Bruno Fernandes",
+            "Jude Bellingham",
+            "Phil Foden",
+            "Pedri",
+            "Gavi",
+            "João Félix",
+            "Frenkie de Jong",
+            "Marcus Rashford",
+            "Bukayo Saka",
+            "Martin Ødegaard",
+            "Casemiro",
+            "Toni Kroos",
+            "Thomas Müller",
+            "Joshua Kimmich",
+            "Ilkay Gündogan",
+            "Bernardo Silva",
+            "Riyad Mahrez",
+            "Jack Grealish",
+            "Declan Rice",
+            "Mason Mount",
+            "Eduardo Camavinga",
+            "Federico Valverde",
+            "Achraf Hakimi",
+            "Theo Hernández",
+            "Alphonso Davies",
+            "Trent Alexander-Arnold",
+            "Andrew Robertson",
+            "Kyle Walker",
+            "João Cancelo",
+            "Raphaël Varane",
+            "Virgil van Dijk",
+            "Sergio Ramos",
+            "Antonio Rüdiger",
+            "Éder Militão",
+            "Marquinhos",
+            "Kalidou Koulibaly",
+            "David Alaba",
+            "Ederson",
+            "Alisson Becker",
+            "Thibaut Courtois",
+            "Emiliano Martínez",
+            "Yassine Bounou",
+            "Marc-André ter Stegen",
+            "Gianluigi Donnarumma",
+            "Manuel Neuer",
+            "Keylor Navas",
+            "Diogo Jota",
+            "Lautaro Martínez",
+            "Ángel Di María",
+            "Rodrygo",
+            "Raphinha",
+            "Gabriel Jesus",
+            "Richarlison",
+            "Romelu Lukaku",
+            "Dusan Vlahović",
+            "Kai Havertz",
+            "Timo Werner",
+            "Christian Pulisic",
+            "Weston McKennie",
+            "Raheem Sterling",
+            "Jamie Vardy",
+            "Jadon Sancho",
+            "Ousmane Dembélé",
+            "Ansu Fati",
+            "Ferran Torres",
+            "Gerard Moreno",
+            "Álvaro Morata",
+            "Iñaki Williams",
+            "Isco",
+            "Miralem Pjanić",
+            "Hakim Ziyech",
+            "Nicolò Barella",
+            "Sergej Milinković-Savić",
+            "Ivan Perišić",
+            "Mateo Kovačić",
+            "Christian Eriksen",
+            "Zlatan Ibrahimović",
+            "Ciro Immobile",
+            "Pierre-Emerick Aubameyang",
+            "Edinson Cavani",
+            "Luis Suárez",
+            "James Rodríguez",
+            "Radamel Falcao",
+            "Andrés Iniesta",
+            "Xavi",
+            "Ronaldinho",
+            "Zinedine Zidane",
+            "Diego Maradona",
+            "Pelé",
+            "Ronaldo Nazário",
+            "David Beckham",
+            "Wayne Rooney",
+            "Frank Lampard",
+            "Steven Gerrard",
+            "Thierry Henry",
+            "Didier Drogba",
+            "Robin van Persie",
+            "Carlos Tévez",
+            "Andrea Pirlo",
+            "Claude Makélélé",
+            "Gennaro Gattuso"
+        ];
+
+        let totalPlayers = 0;
+        let currentPlayer = 1;
+        let impostorIndex = -1;
+        let playerName = "";
+        let roles = [];
+        let holdTimer = null;
+        let countdown = 3;
+
+        const app = document.getElementById("app");
+        const setup = document.getElementById("setup");
+        const game = document.getElementById("game");
+        const end = document.getElementById("end");
+        const counterEl = document.getElementById("counter");
+        const roleEl = document.getElementById("role");
+        const currentPlayerEl = document.getElementById("currentPlayer");
+
+        function startGame() {
+            const num = parseInt(document.getElementById("numPlayers").value);
+            if (isNaN(num) || num < 2) {
+                alert("Debe haber al menos 2 jugadores.");
+                return;
+            }
+
+            totalPlayers = num;
+            playerName = footballers[Math.floor(Math.random() * footballers.length)];
+            impostorIndex = Math.floor(Math.random() * totalPlayers);
+            for (let i = 0; i < totalPlayers; i++) {
+                roles.push(i === impostorIndex ? "Impostor" : playerName);
+            }
+
+            setup.classList.add("hidden");
+            game.classList.remove("hidden");
+            updateUI();
+        }
+
+        function updateUI() {
+            currentPlayerEl.textContent = currentPlayer;
+            counterEl.textContent = "";
+            roleEl.textContent = "";
+        }
+
+        function showRole() {
+            const role = roles[currentPlayer - 1];
+            roleEl.textContent = role === "Impostor" ? "Eres el IMPOSTOR 😈" : `Jugador: ${role}`;
+
+            setTimeout(() => {
+                currentPlayer++;
+                if (currentPlayer > totalPlayers) {
+                    game.classList.add("hidden");
+                    end.classList.remove("hidden");
+                } else {
+                    updateUI();
+                }
+            }, 2000);
+        }
+
+        function startHold() {
+            if (holdTimer) return;
+
+            countdown = 3;
+            counterEl.textContent = countdown;
+            holdTimer = setInterval(() => {
+                countdown--;
+                counterEl.textContent = countdown;
+                if (countdown === 0) {
+                    clearInterval(holdTimer);
+                    holdTimer = null;
+                    showRole();
+                }
+            }, 1000);
+        }
+
+        function cancelHold() {
+            if (countdown > 0 && holdTimer) {
+                clearInterval(holdTimer);
+                holdTimer = null;
+                counterEl.textContent = "";
+            }
+        }
+
+        // Soporte táctil y mouse sobre toda la pantalla
+        app.addEventListener("touchstart", e => {
+            if (!game.classList.contains("hidden")) startHold();
+        });
+        app.addEventListener("touchend", cancelHold);
+        app.addEventListener("touchcancel", cancelHold);
+
+        app.addEventListener("mousedown", e => {
+            if (!game.classList.contains("hidden")) startHold();
+        });
+        app.addEventListener("mouseup", cancelHold);
+        app.addEventListener("mouseleave", cancelHold);
+    </script>
+</body>
+
+</html>
