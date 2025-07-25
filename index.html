@@ -27,13 +27,16 @@
 
         <!-- Pantalla de configuración -->
         <div id="setup" class="space-y-4">
-            <h1 class="text-3xl font-bold">Juego del Impostor - Fútbol</h1>
-            <label class="block text-lg">¿Cuántos jugadores?</label>
+            <h1 class="text-3xl font-bold">¡Impostor Futbolero!</h1>
+            <label class="block text-lg">¿Cuántos participarán?</label>
             <input id="numPlayers" type="number" min="2" max="10"
-                class="w-full max-w-xs px-4 py-2 rounded bg-gray-800 border border-gray-600 text-center"
-                placeholder="Ej: 4">
-            <button onclick="startGame()" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded">Empezar</button>
+                class="w-full max-w-xs px-4 py-2 rounded bg-gray-800 border border-gray-600 text-center 
+           [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="Ejemplo: 4">
+
+            <button onclick="startGame()" class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded">Iniciar</button>
         </div>
+
+
 
         <!-- Pantalla de juego -->
         <div id="game" class="hidden flex flex-col items-center justify-center w-full h-full space-y-6">
@@ -46,7 +49,7 @@
         <!-- Pantalla final -->
         <div id="end" class="hidden space-y-4">
             <h2 class="text-2xl font-semibold">¡Todos han visto su rol!</h2>
-            <p class="text-lg">Ahora discutan quién es el impostor 😈</p>
+            <p class="text-lg">Ahora discutan quién es el impostor</p>
             <button onclick="location.reload()"
                 class="mt-4 bg-red-500 hover:bg-red-600 px-6 py-2 rounded">Reiniciar</button>
         </div>
@@ -216,7 +219,7 @@
 
         function showRole() {
             const role = roles[currentPlayer - 1];
-            roleEl.textContent = role === "Impostor" ? "Eres el IMPOSTOR 😈" : `Jugador: ${role}`;
+            roleEl.textContent = role === "Impostor" ? "Eres el IMPOSTOR" : `Jugador: ${role}`;
 
             setTimeout(() => {
                 currentPlayer++;
