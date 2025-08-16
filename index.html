@@ -2,9 +2,9 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>¿Quién es el impostor?</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html,
@@ -24,24 +24,51 @@
 
 <body class="bg-gray-900 text-white">
     <div id="app" class="flex flex-col items-center justify-center text-center p-4 select-none">
-
         <!-- Pantalla de configuración -->
-        <div id="setup" class="space-y-4">
-            <h1 class="text-3xl font-bold">¡Impostor Futbolero!</h1>
-            <label class="block text-lg">¿Cuántos participarán?</label>
-            <input id="numPlayers" type="number" min="2" max="10"
-                class="w-full max-w-xs px-4 py-2 rounded bg-gray-800 border border-gray-600 text-center 
-           [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="Ejemplo: 4">
+        <div id="setup" class="space-y-5 w-full max-w-md">
+            <h1 class="text-3xl font-bold">¡Impostor!</h1>
 
-            <button onclick="startGame()" class="bg-green-500 hover:bg-green-600 px-6 py-2 rounded">Iniciar</button>
+            <!-- Participantes -->
+            <div class="space-y-2">
+                <label for="numPlayers" class="block text-lg">¿Cuántos participarán?</label>
+                <input id="numPlayers" type="number" min="2" max="10"
+                    class="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="Ej: 4" />
+            </div>
+
+            <!-- Categoría -->
+            <div class="space-y-2">
+                <label for="category" class="block text-lg">Elige una categoría</label>
+                <select id="category" class="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600">
+                    <option>Futbolistas</option>
+                    <option>Actores</option>
+                    <option>Animales</option>
+                    <option>Países</option>
+                    <option>Comidas</option>
+                    <option>Personalizada</option>
+                </select>
+                <p id="hint" class="text-sm text-gray-400"></p>
+            </div>
+
+            <!-- Lista personalizada -->
+            <div id="customWrap" class="space-y-2 hidden">
+                <label for="customList" class="block text-lg">Lista personalizada (separada por comas)</label>
+                <textarea id="customList" rows="3" class="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600"
+                    placeholder="Ej: Pikachu, Mario, Sonic, Kirby"></textarea>
+                <p class="text-xs text-gray-400">Usaremos un elemento al azar de esta lista como palabra común.</p>
+            </div>
+
+            <!-- Controles -->
+            <div class="flex items-center justify-between gap-3">
+                <button id="btnStart" class="flex-1 bg-green-500 hover:bg-green-600 px-4 py-2 rounded">Iniciar</button>
+            </div>
         </div>
-
-
 
         <!-- Pantalla de juego -->
         <div id="game" class="hidden flex flex-col items-center justify-center w-full h-full space-y-6">
-            <p id="instruction" class="text-xl font-semibold">Jugador <span id="currentPlayer">1</span>: Mantén
-                presionada la pantalla</p>
+            <p id="instruction" class="text-xl font-semibold">
+                Jugador <span id="currentPlayer">1</span>: Mantén presionada la pantalla
+            </p>
             <div id="counter" class="text-5xl font-bold font-mono"></div>
             <div id="role" class="text-3xl font-bold mt-2"></div>
         </div>
@@ -50,108 +77,212 @@
         <div id="end" class="hidden space-y-4">
             <h2 class="text-2xl font-semibold">¡Todos han visto su rol!</h2>
             <p class="text-lg">Ahora discutan quién es el impostor</p>
-            <button onclick="location.reload()"
-                class="mt-4 bg-red-500 hover:bg-red-600 px-6 py-2 rounded">Reiniciar</button>
+            <div class="flex gap-2">
+                <button id="btnAgain" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded">Jugar de nuevo</button>
+                <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 px-6 py-2 rounded">Volver al
+                    inicio</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const footballers = [
-    "Robert Downey Jr.",
-    "Leonardo DiCaprio",
-    "Meryl Streep",
-    "Dwayne Johnson",
-    "Scarlett Johansson",
-    "Tom Hanks",
-    "Will Smith",
-    "Johnny Depp",
-    "Brad Pitt",
-    "Jennifer Lawrence",
-    "Morgan Freeman",
-    "Chris Hemsworth",
-    "Emma Stone",
-    "Ryan Reynolds",
-    "Tom Cruise",
-    "Matt Damon",
-    "Julia Roberts",
-    "Angelina Jolie",
-    "Hugh Jackman",
-    "Nicole Kidman",
-    "Daniel Day-Lewis",
-    "Al Pacino",
-    "Kate Winslet",
-    "Samuel L. Jackson",
-    "Charlize Theron",
-    "Idris Elba",
-    "Keanu Reeves",
-    "Joaquin Phoenix",
-    "Christian Bale",
-    "Anne Hathaway",
-    "Natalie Portman",
-    "Ben Affleck",
-    "Mark Ruffalo",
-    "Gal Gadot",
-    "Amy Adams",
-    "Jake Gyllenhaal",
-    "Sandra Bullock",
-    "Harrison Ford",
-    "Robert De Niro",
-    "Cillian Murphy",
-    "Matt Smith",
-    "Zendaya",
-    "Timothée Chalamet",
-    "Florence Pugh",
-    "Pedro Pascal",
-    "Oscar Isaac",
-    "Anthony Hopkins",
-    "Helen Mirren",
-    "Cate Blanchett",
-    "Viola Davis",
-    "Jessica Chastain",
-    "Chris Evans",
-    "Paul Rudd",
-    "Tom Hardy",
-    "Michael Fassbender",
-    "Margot Robbie",
-    "Zoe Saldana",
-    "Eddie Redmayne",
-    "Emily Blunt",
-    "Rami Malek",
-    "Javier Bardem",
-    "Penélope Cruz",
-    "Salma Hayek",
-    "Gael García Bernal",
-    "Diego Luna",
-    "Adam Driver",
-    "Donald Glover",
-    "Hugh Grant",
-    "Rachel McAdams",
-    "Michelle Williams",
-    "Kirsten Dunst",
-    "Emma Watson",
-    "Daniel Radcliffe",
-    "Rupert Grint",
-    "Brie Larson",
-    "Elizabeth Olsen",
-    "Anya Taylor-Joy",
-    "Millie Bobby Brown"
-        ];
+        // ======================
+        //  Datos por categoría
+        // ======================
+        const CATEGORIES = {
+            Futbolistas: [
+                "Lionel Messi",
+                "Cristiano Ronaldo",
+                "Neymar",
+                "Kylian Mbappé",
+                "Erling Haaland",
+                "Luka Modrić",
+                "Kevin De Bruyne",
+                "Antoine Griezmann",
+                "Vinícius Júnior",
+                "Mohamed Salah",
+                "Harry Kane",
+                "Robert Lewandowski",
+                "Karim Benzema",
+                "Ronaldinho",
+                "Zinedine Zidane",
+                "Paolo Maldini",
+                "Andrea Pirlo",
+                "Claudio Bravo",
+                "Alexis Sánchez",
+                "Arturo Vidal",
+            ],
+            Actores: [
+                "Robert Downey Jr.",
+                "Leonardo DiCaprio",
+                "Meryl Streep",
+                "Dwayne Johnson",
+                "Scarlett Johansson",
+                "Tom Hanks",
+                "Will Smith",
+                "Johnny Depp",
+                "Brad Pitt",
+                "Jennifer Lawrence",
+                "Morgan Freeman",
+                "Chris Hemsworth",
+                "Emma Stone",
+                "Ryan Reynolds",
+                "Tom Cruise",
+                "Julia Roberts",
+                "Angelina Jolie",
+                "Hugh Jackman",
+                "Nicole Kidman",
+                "Daniel Day-Lewis",
+                "Al Pacino",
+                "Kate Winslet",
+                "Samuel L. Jackson",
+                "Charlize Theron",
+                "Idris Elba",
+                "Keanu Reeves",
+                "Joaquin Phoenix",
+                "Christian Bale",
+                "Anne Hathaway",
+                "Natalie Portman",
+                "Gal Gadot",
+                "Amy Adams",
+                "Jake Gyllenhaal",
+                "Sandra Bullock",
+                "Harrison Ford",
+                "Robert De Niro",
+                "Cillian Murphy",
+                "Zendaya",
+                "Timothée Chalamet",
+                "Florence Pugh",
+                "Pedro Pascal",
+                "Oscar Isaac",
+                "Anthony Hopkins",
+                "Helen Mirren",
+                "Cate Blanchett",
+                "Viola Davis",
+                "Jessica Chastain",
+                "Chris Evans",
+                "Paul Rudd",
+                "Tom Hardy",
+                "Margot Robbie",
+                "Zoe Saldana",
+                "Emily Blunt",
+                "Rami Malek",
+                "Javier Bardem",
+                "Penélope Cruz",
+                "Salma Hayek",
+                "Gael García Bernal",
+                "Diego Luna",
+            ],
+            Animales: [
+                "León",
+                "Tigre",
+                "Elefante",
+                "Jirafa",
+                "Panda",
+                "Koala",
+                "Zorro",
+                "Lobo",
+                "Águila",
+                "Delfín",
+                "Ballena",
+                "Pingüino",
+                "Canguro",
+                "Nutria",
+                "Hipopótamo",
+                "Rinoceronte",
+            ],
+            Países: [
+                "Chile",
+                "Argentina",
+                "Brasil",
+                "Perú",
+                "México",
+                "Estados Unidos",
+                "España",
+                "Francia",
+                "Alemania",
+                "Italia",
+                "Portugal",
+                "Japón",
+                "Corea del Sur",
+                "Australia",
+                "Canadá",
+                "China",
+            ],
+            Comidas: [
+                "Pizza",
+                "Hamburguesa",
+                "Sushi",
+                "Empanada",
+                "Arepa",
+                "Asado",
+                "Ceviche",
+                "Pasta",
+                "Ramen",
+                "Taco",
+                "Anticucho",
+                "Choripán",
+                "Lasaña",
+                "Paella",
+            ],
+        };
 
+        // Estado de juego
         let totalPlayers = 0;
         let currentPlayer = 1;
         let impostorIndex = -1;
-        let playerName = "";
+        let commonWord = ""; // palabra común
         let roles = [];
         let holdTimer = null;
         let countdown = 3;
 
-        const app = document.getElementById("app");
+        // Elementos
         const setup = document.getElementById("setup");
         const game = document.getElementById("game");
         const end = document.getElementById("end");
         const counterEl = document.getElementById("counter");
         const roleEl = document.getElementById("role");
         const currentPlayerEl = document.getElementById("currentPlayer");
+        const categorySel = document.getElementById("category");
+        const hint = document.getElementById("hint");
+        const customWrap = document.getElementById("customWrap");
+        const customList = document.getElementById("customList");
+        const btnPreview = document.getElementById("btnPreview");
+        const btnStart = document.getElementById("btnStart");
+        const btnAgain = document.getElementById("btnAgain");
+
+        // Helpers
+        const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const cleanSplit = (text) =>
+            text
+                .split(",")
+                .map((s) => s.trim())
+                .filter((s) => s.length > 0);
+
+        function currentPool() {
+            const cat = categorySel.value;
+            if (cat === "Personalizada") {
+                return cleanSplit(customList.value);
+            }
+            return CATEGORIES[cat] || [];
+        }
+
+        // UI dinámica para categoría
+        categorySel.addEventListener("change", () => {
+            const cat = categorySel.value;
+            customWrap.classList.toggle("hidden", cat !== "Personalizada");
+            if (cat === "Personalizada") {
+                hint.textContent = "Escribe tu lista separada por comas (mínimo 2 elementos recomendado).";
+            } else {
+                const size = (CATEGORIES[cat] || []).length;
+                hint.textContent = `La categoría "${cat}" tiene ${size} elementos.`;
+            }
+        });
+        // Inicializa hint
+        hint.textContent = `La categoría "${categorySel.value}" tiene ${CATEGORIES[categorySel.value].length} elementos.`;
+
+        // Iniciar juego
+        btnStart.addEventListener("click", startGame);
 
         function startGame() {
             const num = parseInt(document.getElementById("numPlayers").value);
@@ -159,12 +290,20 @@
                 alert("Debe haber al menos 2 jugadores.");
                 return;
             }
+            const pool = currentPool();
+            if (!pool.length) {
+                alert("Tu categoría no tiene elementos. Agrega algunos o elige otra.");
+                return;
+            }
 
             totalPlayers = num;
-            playerName = footballers[Math.floor(Math.random() * footballers.length)];
+            currentPlayer = 1;
             impostorIndex = Math.floor(Math.random() * totalPlayers);
+            commonWord = pickRandom(pool);
+
+            roles = [];
             for (let i = 0; i < totalPlayers; i++) {
-                roles.push(i === impostorIndex ? "Impostor" : playerName);
+                roles.push(i === impostorIndex ? "Impostor" : commonWord);
             }
 
             setup.classList.add("hidden");
@@ -180,7 +319,7 @@
 
         function showRole() {
             const role = roles[currentPlayer - 1];
-            roleEl.textContent = role === "Impostor" ? "Eres el IMPOSTOR" : `Jugador: ${role}`;
+            roleEl.textContent = role === "Impostor" ? "Eres el IMPOSTOR" : `Tu palabra: ${role}`;
 
             setTimeout(() => {
                 currentPlayer++;
@@ -190,12 +329,11 @@
                 } else {
                     updateUI();
                 }
-            }, 2000);
+            }, 1700);
         }
 
         function startHold() {
             if (holdTimer) return;
-
             countdown = 3;
             counterEl.textContent = countdown;
             holdTimer = setInterval(() => {
@@ -217,14 +355,35 @@
             }
         }
 
+        // Repetir con misma configuración
+        btnAgain.addEventListener("click", () => {
+            // Solo re-sortea impostor y palabra, manteniendo jugadores
+            const pool = currentPool();
+            if (!pool.length) {
+                end.classList.add("hidden");
+                setup.classList.remove("hidden");
+                return;
+            }
+            currentPlayer = 1;
+            impostorIndex = Math.floor(Math.random() * totalPlayers);
+            commonWord = pickRandom(pool);
+            roles = [];
+            for (let i = 0; i < totalPlayers; i++) {
+                roles.push(i === impostorIndex ? "Impostor" : commonWord);
+            }
+            end.classList.add("hidden");
+            game.classList.remove("hidden");
+            updateUI();
+        });
+
         // Soporte táctil y mouse sobre toda la pantalla
-        app.addEventListener("touchstart", e => {
+        const app = document.getElementById("app");
+        app.addEventListener("touchstart", (e) => {
             if (!game.classList.contains("hidden")) startHold();
         });
         app.addEventListener("touchend", cancelHold);
         app.addEventListener("touchcancel", cancelHold);
-
-        app.addEventListener("mousedown", e => {
+        app.addEventListener("mousedown", (e) => {
             if (!game.classList.contains("hidden")) startHold();
         });
         app.addEventListener("mouseup", cancelHold);
